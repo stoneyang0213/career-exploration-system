@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职业探索星图 - 发现你的独特天赋</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .assessment-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .assessment-card-2 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .assessment-card-3 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 顶部导航 -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-compass text-2xl text-indigo-600 mr-3"></i>
+                        <h1 class="text-xl font-bold text-gray-800">职业探索星图</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#about" class="text-gray-600 hover:text-indigo-600 transition-colors">关于我们</a>
+                    <a href="#contact" class="text-gray-600 hover:text-indigo-600 transition-colors">联系方式</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <section class="gradient-bg text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="floating-animation inline-block mb-8">
+                <i class="fas fa-star-of-life text-6xl opacity-80"></i>
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                发现你的<span class="text-yellow-300">独特天赋</span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto leading-relaxed">
+                通过科学的心理测评，帮你找到最适合的职业方向<br>
+                让每一份天赋都找到它的舞台
+            </p>
+
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                <button id="startAssessment" class="bg-white text-indigo-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-rocket mr-2"></i>
+                    开始职业探索
+                </button>
+                <button class="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-indigo-600 transition-all">
+                    <i class="fas fa-play mr-2"></i>
+                    观看介绍视频
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 测评流程 -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">三维测评体系</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    融合MBTI性格理论、霍兰德职业兴趣模型和价值观评估，为你绘制专属的职业地图
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- MBTI 测评卡片 -->
+                <div class="assessment-card rounded-2xl p-8 text-white card-hover cursor-pointer" onclick="startMBTI()">
+                    <div class="text-center">
+                        <div class="inline-block p-4 bg-white bg-opacity-20 rounded-full mb-6">
+                            <i class="fas fa-user-friends text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">MBTI 性格测评</h3>
+                        <p class="text-lg opacity-90 mb-6">
+                            探索你的性格类型，了解内向/外向、感觉/直觉、思维/情感、判断/知觉四个维度
+                        </p>
+                        <div class="flex items-center justify-between text-sm opacity-80">
+                            <span><i class="fas fa-clock mr-1"></i>约 10 分钟</span>
+                            <span><i class="fas fa-question-circle mr-1"></i>28 题</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 霍兰德测评卡片 -->
+                <div class="assessment-card-2 rounded-2xl p-8 text-white card-hover cursor-pointer" onclick="startHolland()">
+                    <div class="text-center">
+                        <div class="inline-block p-4 bg-white bg-opacity-20 rounded-full mb-6">
+                            <i class="fas fa-briefcase text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">霍兰德职业兴趣</h3>
+                        <p class="text-lg opacity-90 mb-6">
+                            发现你的职业兴趣倾向，探索现实型、研究型、艺术型、社会型、企业型、事务型六大类型
+                        </p>
+                        <div class="flex items-center justify-between text-sm opacity-80">
+                            <span><i class="fas fa-clock mr-1"></i>约 8 分钟</span>
+                            <span><i class="fas fa-question-circle mr-1"></i>24 题</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 价值观测评卡片 -->
+                <div class="assessment-card-3 rounded-2xl p-8 text-white card-hover cursor-pointer" onclick="startValues()">
+                    <div class="text-center">
+                        <div class="inline-block p-4 bg-white bg-opacity-20 rounded-full mb-6">
+                            <i class="fas fa-heart text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">职业价值观测评</h3>
+                        <p class="text-lg opacity-90 mb-6">
+                            明确你的核心价值观，包括成就感、社会需要、自我实现、家庭和工作平衡等八个维度
+                        </p>
+                        <div class="flex items-center justify-between text-sm opacity-80">
+                            <span><i class="fas fa-clock mr-1"></i>约 6 分钟</span>
+                            <span><i class="fas fa-question-circle mr-1"></i>16 题</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特色功能 -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">为什么选择我们</h2>
+                <p class="text-xl text-gray-600">基于科学理论，用AI技术提供个性化的职业指导</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all">
+                    <div class="inline-block p-4 bg-indigo-100 rounded-full mb-4">
+                        <i class="fas fa-brain text-2xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">科学权威</h3>
+                    <p class="text-gray-600">基于MBTI、霍兰德等成熟理论体系</p>
+                </div>
+
+                <div class="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all">
+                    <div class="inline-block p-4 bg-green-100 rounded-full mb-4">
+                        <i class="fas fa-robot text-2xl text-green-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">AI个性化</h3>
+                    <p class="text-gray-600">智能分析生成专属职业报告</p>
+                </div>
+
+                <div class="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all">
+                    <div class="inline-block p-4 bg-purple-100 rounded-full mb-4">
+                        <i class="fas fa-chart-line text-2xl text-purple-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">数据可视</h3>
+                    <p class="text-gray-600">直观的图表展示测评结果</p>
+                </div>
+
+                <div class="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all">
+                    <div class="inline-block p-4 bg-orange-100 rounded-full mb-4">
+                        <i class="fas fa-route text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">成长路径</h3>
+                    <p class="text-gray-600">提供具体的职业发展建议</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 开始测评按钮 -->
+    <section class="py-16 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-12 text-white">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">准备开始你的职业探索之旅？</h2>
+                <p class="text-xl mb-8 opacity-90">
+                    只需 20 分钟，就能获得一份专属的职业指导报告
+                </p>
+                <button id="startFullAssessment" class="bg-white text-indigo-600 px-12 py-4 rounded-full font-bold text-xl hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg pulse-animation">
+                    <i class="fas fa-compass mr-3"></i>
+                    开始完整测评
+                </button>
+                <div class="mt-6 text-sm opacity-80">
+                    <i class="fas fa-shield-alt mr-2"></i>
+                    你的隐私数据受到严格保护
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-compass text-2xl text-indigo-400 mr-3"></i>
+                        <h3 class="font-bold text-lg">职业探索星图</h3>
+                    </div>
+                    <p class="text-gray-400">
+                        用科学的方法发现你的天赋，用AI的力量照亮职业方向。
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">测评服务</h4>
+                    <ul class="text-gray-400 space-y-2">
+                        <li>MBTI性格测评</li>
+                        <li>霍兰德职业兴趣</li>
+                        <li>职业价值观评估</li>
+                        <li>综合职业报告</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">帮助中心</h4>
+                    <ul class="text-gray-400 space-y-2">
+                        <li>测评指南</li>
+                        <li>结果解读</li>
+                        <li>常见问题</li>
+                        <li>联系客服</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">关注我们</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-weixin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-weibo text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-qq text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 职业探索星图. 所有权利保留. | 用心发现每个人的独特光芒</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

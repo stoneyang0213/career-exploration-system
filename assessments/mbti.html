@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI性格测评 - 职业探索星图</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../assets/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .question-card {
+            transition: all 0.3s ease;
+            transform: translateX(100px);
+            opacity: 0;
+        }
+        
+        .question-card.active {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .option-button {
+            transition: all 0.2s ease;
+        }
+        
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .option-button.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .progress-ring {
+            transition: stroke-dasharray 0.3s ease;
+        }
+
+        .floating-icons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-icon {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- 浮动图标背景 -->
+    <div class="floating-icons">
+        <i class="floating-icon fas fa-brain text-4xl text-indigo-300" style="left: 10%; animation-delay: 0s;"></i>
+        <i class="floating-icon fas fa-lightbulb text-3xl text-purple-300" style="left: 20%; animation-delay: 2s;"></i>
+        <i class="floating-icon fas fa-heart text-3xl text-pink-300" style="left: 30%; animation-delay: 4s;"></i>
+        <i class="floating-icon fas fa-eye text-4xl text-blue-300" style="left: 40%; animation-delay: 6s;"></i>
+        <i class="floating-icon fas fa-compass text-3xl text-green-300" style="left: 50%; animation-delay: 8s;"></i>
+        <i class="floating-icon fas fa-star text-4xl text-yellow-300" style="left: 60%; animation-delay: 10s;"></i>
+        <i class="floating-icon fas fa-puzzle-piece text-3xl text-red-300" style="left: 70%; animation-delay: 12s;"></i>
+        <i class="floating-icon fas fa-magic text-4xl text-indigo-300" style="left: 80%; animation-delay: 14s;"></i>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="bg-white/80 backdrop-blur-sm shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../index.html" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        返回首页
+                    </a>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center mr-6">
+                        <i class="fas fa-compass text-2xl text-indigo-600 mr-3"></i>
+                        <span class="font-bold text-gray-800">MBTI性格测评</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 进度条 -->
+    <div class="bg-white/80 backdrop-blur-sm shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 mr-4">
+                        <svg class="w-12 h-12 transform -rotate-90">
+                            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4" fill="none" class="text-gray-200"></circle>
+                            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4" fill="none" 
+                                    class="text-indigo-600 progress-ring" 
+                                    stroke-dasharray="125.6" 
+                                    stroke-dashoffset="125.6"
+                                    id="progressRing"></circle>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-semibold text-gray-800">探索你的性格维度</h2>
+                        <p class="text-sm text-gray-600" id="progressText">准备开始...</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-indigo-600" id="questionCounter">0/28</div>
+                    <div class="text-sm text-gray-500">题目进度</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 测评内容区域 -->
+    <div class="max-w-4xl mx-auto px-4 py-8 relative">
+        <!-- 开始界面 -->
+        <div id="startScreen" class="text-center bg-white/80 backdrop-blur-sm rounded-3xl p-12 shadow-xl">
+            <div class="mb-8">
+                <i class="fas fa-user-friends text-6xl text-indigo-600 mb-6"></i>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">MBTI性格测评</h1>
+                <p class="text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
+                    通过28个精心设计的问题，探索你在四个核心维度上的性格倾向
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-8 text-left">
+                <div class="p-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-users text-purple-600 text-xl mr-3"></i>
+                        <h3 class="font-semibold text-gray-800">外向 (E) vs 内向 (I)</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">你更喜欢从外部世界获得能量，还是从内心世界获得能量？</p>
+                </div>
+
+                <div class="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-eye text-blue-600 text-xl mr-3"></i>
+                        <h3 class="font-semibold text-gray-800">感觉 (S) vs 直觉 (N)</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">你更倾向于关注具体的事实，还是抽象的可能性？</p>
+                </div>
+
+                <div class="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-brain text-green-600 text-xl mr-3"></i>
+                        <h3 class="font-semibold text-gray-800">思维 (T) vs 情感 (F)</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">你更习惯用逻辑分析，还是价值判断来做决定？</p>
+                </div>
+
+                <div class="p-6 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-100">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-compass text-orange-600 text-xl mr-3"></i>
+                        <h3 class="font-semibold text-gray-800">判断 (J) vs 知觉 (P)</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">你更喜欢有计划的生活方式，还是灵活自发的生活方式？</p>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <div class="flex items-center justify-center space-x-6 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-clock mr-2 text-indigo-600"></i>
+                        <span>约 8-10 分钟</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-question-circle mr-2 text-indigo-600"></i>
+                        <span>28 个问题</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-heart mr-2 text-indigo-600"></i>
+                        <span>真诚作答</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="mbtiAssessment.startTest()" 
+                    class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-12 py-4 rounded-full font-bold text-xl hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
+                <i class="fas fa-rocket mr-3"></i>
+                开始测评
+            </button>
+        </div>
+
+        <!-- 问题界面 -->
+        <div id="questionScreen" class="hidden">
+            <div class="question-card bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl">
+                <div class="text-center mb-8">
+                    <div class="inline-block p-4 bg-indigo-100 rounded-full mb-4">
+                        <i class="fas fa-lightbulb text-2xl text-indigo-600" id="questionIcon"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2" id="questionTitle">问题标题</h2>
+                    <p class="text-lg text-gray-600" id="questionText">问题内容...</p>
+                </div>
+
+                <div class="space-y-4" id="optionsContainer">
+                    <!-- 选项将通过JavaScript动态生成 -->
+                </div>
+
+                <div class="flex justify-between items-center mt-8">
+                    <button id="prevButton" onclick="mbtiAssessment.prevQuestion()" 
+                            class="flex items-center px-6 py-3 text-gray-600 hover:text-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        上一题
+                    </button>
+
+                    <div class="flex items-center space-x-4">
+                        <button onclick="mbtiAssessment.saveAndExit()" 
+                                class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors text-sm">
+                            保存并退出
+                        </button>
+                        
+                        <button id="nextButton" onclick="mbtiAssessment.nextQuestion()" 
+                                class="flex items-center px-8 py-3 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                            下一题
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果界面 -->
+        <div id="resultScreen" class="hidden">
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl text-center">
+                <div class="mb-8">
+                    <i class="fas fa-trophy text-6xl text-yellow-500 mb-6"></i>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-4">测评完成！</h1>
+                    <p class="text-xl text-gray-600 mb-6">
+                        恭喜你完成了MBTI性格测评，正在分析你的结果...
+                    </p>
+                </div>
+
+                <div class="mb-8">
+                    <div class="inline-block p-4 bg-indigo-100 rounded-full mb-4">
+                        <i class="fas fa-sync fa-spin text-2xl text-indigo-600"></i>
+                    </div>
+                    <p class="text-gray-600">正在计算你的性格类型...</p>
+                </div>
+
+                <div id="mbtiResult" class="hidden">
+                    <!-- 结果内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/mbti-data.js"></script>
+    <script src="../js/mbti-assessment.js"></script>
+</body>
+</html>

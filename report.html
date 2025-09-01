@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>综合职业评估报告 - 职业探索星图</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="assets/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .report-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+        }
+        
+        .insight-card {
+            transition: all 0.3s ease;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        
+        .insight-card.animate {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .career-card {
+            transition: all 0.2s ease;
+        }
+        
+        .career-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+        
+        .print-hidden {
+            display: none;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-hidden {
+                display: block !important;
+            }
+            body {
+                font-size: 12px;
+            }
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.05;
+            animation: float-elements 30s infinite linear;
+        }
+
+        @keyframes float-elements {
+            0% { transform: translateY(100vh) rotate(0deg) scale(0.5); }
+            100% { transform: translateY(-100px) rotate(360deg) scale(1.2); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <!-- 浮动元素背景 -->
+    <div class="floating-elements">
+        <i class="floating-element fas fa-star text-6xl text-yellow-400" style="left: 10%; animation-delay: 0s;"></i>
+        <i class="floating-element fas fa-compass text-5xl text-blue-400" style="left: 30%; animation-delay: 5s;"></i>
+        <i class="floating-element fas fa-trophy text-4xl text-yellow-400" style="left: 50%; animation-delay: 10s;"></i>
+        <i class="floating-element fas fa-rocket text-5xl text-purple-400" style="left: 70%; animation-delay: 15s;"></i>
+        <i class="floating-element fas fa-crown text-4xl text-pink-400" style="left: 90%; animation-delay: 20s;"></i>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-lg no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        返回首页
+                    </a>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center mr-6">
+                        <i class="fas fa-file-alt text-2xl text-indigo-600 mr-3"></i>
+                        <span class="font-bold text-gray-800">综合职业评估报告</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="report.printReport()" class="text-gray-600 hover:text-indigo-600 transition-colors">
+                            <i class="fas fa-print mr-1"></i>
+                            打印
+                        </button>
+                        <button onclick="report.shareReport()" class="text-gray-600 hover:text-indigo-600 transition-colors">
+                            <i class="fas fa-share-alt mr-1"></i>
+                            分享
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 报告内容 -->
+    <div class="max-w-6xl mx-auto px-4 py-8 relative">
+        <!-- 报告标题 -->
+        <div class="text-center mb-12">
+            <div class="inline-block p-6 report-bg rounded-full mb-6 shadow-xl">
+                <i class="fas fa-user-astronaut text-4xl text-white"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">你的职业探索报告</h1>
+            <p class="text-xl text-gray-600 mb-6">基于MBTI、霍兰德和价值观的综合分析</p>
+            <div class="text-sm text-gray-500" id="reportDate">
+                生成时间：<span id="currentDate"></span>
+            </div>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loadingScreen" class="text-center py-16">
+            <div class="inline-block p-6 bg-indigo-100 rounded-full mb-6">
+                <i class="fas fa-sync fa-spin text-3xl text-indigo-600"></i>
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">正在生成你的综合报告...</h2>
+            <p class="text-gray-600">整合你的性格特质、职业兴趣和价值观...</p>
+        </div>
+
+        <!-- 报告内容区域 -->
+        <div id="reportContent" class="hidden">
+            <!-- 个人概览 -->
+            <section class="mb-12">
+                <div class="bg-white rounded-3xl p-8 shadow-xl">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-user-circle text-indigo-600 mr-3"></i>
+                        个人职业画像
+                    </h2>
+                    <div id="personalOverview" class="grid md:grid-cols-3 gap-6">
+                        <!-- 内容将通过JavaScript生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 综合分析 -->
+            <section class="mb-12">
+                <div class="bg-white rounded-3xl p-8 shadow-xl">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-chart-pie text-green-600 mr-3"></i>
+                        综合特质分析
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">性格-兴趣匹配度</h3>
+                            <canvas id="compatibilityChart" style="height: 300px;"></canvas>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">综合特质雷达图</h3>
+                            <canvas id="traitsRadarChart" style="height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 职业推荐 -->
+            <section class="mb-12">
+                <div class="bg-white rounded-3xl p-8 shadow-xl">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-briefcase text-blue-600 mr-3"></i>
+                        个性化职业推荐
+                    </h2>
+                    <div id="careerRecommendations" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- 内容将通过JavaScript生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 发展建议 -->
+            <section class="mb-12">
+                <div class="bg-white rounded-3xl p-8 shadow-xl">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-route text-purple-600 mr-3"></i>
+                        个人发展路径
+                    </h2>
+                    <div id="developmentPlan" class="space-y-6">
+                        <!-- 内容将通过JavaScript生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI洞察 -->
+            <section class="mb-12">
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl p-8 border border-purple-100">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-robot text-purple-600 mr-3"></i>
+                        AI智能洞察
+                    </h2>
+                    <div id="aiInsights" class="bg-white rounded-xl p-6">
+                        <div class="text-center py-8">
+                            <i class="fas fa-sync fa-spin text-2xl text-purple-600 mb-4"></i>
+                            <p class="text-gray-600">AI正在为你生成个性化洞察...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 行动计划 -->
+            <section class="mb-12">
+                <div class="bg-white rounded-3xl p-8 shadow-xl">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-tasks text-orange-600 mr-3"></i>
+                        30天行动计划
+                    </h2>
+                    <div id="actionPlan" class="space-y-4">
+                        <!-- 内容将通过JavaScript生成 -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 反馈区域 -->
+        <section class="no-print">
+            <div class="bg-white rounded-3xl p-8 shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-comment-dots text-pink-600 mr-3"></i>
+                    报告反馈
+                </h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">这份报告对你有帮助吗？</h3>
+                        <div class="flex items-center space-x-4 mb-4">
+                            <div class="flex items-center space-x-1" id="ratingStars">
+                                <i class="fas fa-star text-gray-300 cursor-pointer text-2xl" data-rating="1"></i>
+                                <i class="fas fa-star text-gray-300 cursor-pointer text-2xl" data-rating="2"></i>
+                                <i class="fas fa-star text-gray-300 cursor-pointer text-2xl" data-rating="3"></i>
+                                <i class="fas fa-star text-gray-300 cursor-pointer text-2xl" data-rating="4"></i>
+                                <i class="fas fa-star text-gray-300 cursor-pointer text-2xl" data-rating="5"></i>
+                            </div>
+                        </div>
+                        <textarea 
+                            id="feedbackText" 
+                            placeholder="请分享你的感受和建议..."
+                            class="w-full p-4 border border-gray-300 rounded-lg resize-none"
+                            rows="4"></textarea>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">继续你的职业探索</h3>
+                        <div class="space-y-3">
+                            <button class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition-all">
+                                <i class="fas fa-search mr-2"></i>
+                                搜索相关职位
+                            </button>
+                            <button class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition-all">
+                                <i class="fas fa-graduation-cap mr-2"></i>
+                                制定学习计划
+                            </button>
+                            <button class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition-all">
+                                <i class="fas fa-users mr-2"></i>
+                                连接职业导师
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 text-center">
+                    <button onclick="report.submitFeedback()" class="bg-pink-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-pink-700 transition-all">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        提交反馈
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/report-generator.js"></script>
+</body>
+</html>
