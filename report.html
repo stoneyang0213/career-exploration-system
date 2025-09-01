@@ -212,6 +212,23 @@
                 </div>
             </section>
 
+            <!-- AI专业报告 -->
+            <section class="mb-12">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl p-8 border border-blue-100">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-brain text-blue-600 mr-3"></i>
+                        AI专业报告
+                    </h2>
+                    <div id="aiReportSection" class="bg-white rounded-xl p-6">
+                        <div class="text-center py-8">
+                            <i class="fas fa-sync fa-spin text-2xl text-blue-600 mb-4"></i>
+                            <p class="text-gray-600">正在生成AI专业报告...</p>
+                        </div>
+                    </div>
+                    <div id="pdfStatus" class="mt-4"></div>
+                </div>
+            </section>
+
             <!-- 行动计划 -->
             <section class="mb-12">
                 <div class="bg-white rounded-3xl p-8 shadow-xl">
@@ -279,6 +296,10 @@
         </section>
     </div>
 
+    <!-- 添加jsPDF库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- 添加AI服务 -->
+    <script src="js/ai-service.js"></script>
     <script src="js/report-generator.js"></script>
 </body>
 </html>

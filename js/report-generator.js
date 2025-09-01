@@ -5,6 +5,10 @@ class ReportGenerator {
         this.hollandResult = null;
         this.valuesResult = null;
         this.userRating = 0;
+        // 新增AI和PDF服务
+        this.aiService = new AIService();
+        this.pdfService = new PDFService();
+        this.aiReport = null;
         this.init();
     }
 
@@ -125,6 +129,11 @@ class ReportGenerator {
         setTimeout(() => {
             this.generateAIInsights();
         }, 1000);
+
+        // 生成AI报告
+        setTimeout(() => {
+            this.generateAIReport();
+        }, 2000);
 
         // 动画显示各个卡片
         this.animateCards();
@@ -841,6 +850,283 @@ class ReportGenerator {
             navigator.clipboard.writeText(window.location.href).then(() => {
                 alert('报告链接已复制到剪贴板！');
             });
+        }
+    }
+
+    // 生成AI报告
+    async generateAIReport() {
+        try {
+            // 显示AI报告生成状态
+            this.showAIReportStatus('正在生成AI专业报告...');
+            
+            // 检查API密钥
+            const apiKey = localStorage.getItem('openai_api_key');
+            if (!apiKey) {
+                this.showAPIKeyModal();
+                return;
+            }
+
+            // 设置API密钥
+            this.aiService.setApiKey(apiKey);
+            
+            // 生成AI报告
+            this.aiReport = await this.aiService.generateCareerReport(
+                this.mbtiResult,
+                this.hollandResult,
+                this.valuesResult
+            );
+            
+            // 保存AI报告到本地存储
+            localStorage.setItem('ai_report', JSON.stringify(this.aiReport));
+            
+            // 显示AI报告生成成功
+            this.showAIReportStatus('AI专业报告生成完成！', 'success');
+            
+            // 显示PDF导出按钮
+            this.showPDFExportButton();
+            
+        } catch (error) {
+            console.error('AI报告生成失败:', error);
+            this.showAIReportStatus('AI报告生成失败，请重试', 'error');
+        }
+    }
+
+    // 显示AI报告状态
+    showAIReportStatus(message, type = 'loading') {
+        const aiReportSection = document.getElementById('aiReportSection');
+        if (!aiReportSection) return;
+
+        const statusHTML = `
+            <div class="text-center py-8">
+                <div class="inline-block p-4 rounded-full mb-4 ${
+                    type === 'success' ? 'bg-green-100' : 
+                    type === 'error' ? 'bg-red-100' : 'bg-blue-100'
+                }">
+                    <i class="fas fa-${
+                        type === 'success' ? 'check-circle text-green-600' : 
+                        type === 'error' ? 'times-circle text-red-600' : 'sync fa-spin text-blue-600'
+                    } text-2xl"></i>
+                </div>
+                <p class="text-gray-700 font-medium">${message}</p>
+            </div>
+        `;
+        
+        aiReportSection.innerHTML = statusHTML;
+    }
+
+    // 显示API密钥输入模态框
+    showAPIKeyModal() {
+        const modalHTML = `
+            <div id="apiKeyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">设置OpenAI API密钥</h3>
+                    <p class="text-gray-600 mb-4">为了生成AI专业报告，需要设置OpenAI API密钥。</p>
+                    <input 
+                        type="password" 
+                        id="apiKeyInput" 
+                        placeholder="请输入您的OpenAI API密钥"
+                        class="w-full p-3 border border-gray-300 rounded-lg mb-4"
+                    >
+                    <div class="flex space-x-3">
+                        <button onclick="report.saveAPIKey()" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                            保存并生成报告
+                        </button>
+                        <button onclick="report.closeAPIKeyModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400">
+                            取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    // 保存API密钥
+    saveAPIKey() {
+        const apiKey = document.getElementById('apiKeyInput').value.trim();
+        if (!apiKey) {
+            alert('请输入API密钥');
+            return;
+        }
+        
+        localStorage.setItem('openai_api_key', apiKey);
+        this.closeAPIKeyModal();
+        
+        // 重新生成AI报告
+        this.generateAIReport();
+    }
+
+    // 关闭API密钥模态框
+    closeAPIKeyModal() {
+        const modal = document.getElementById('apiKeyModal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    // 显示PDF导出按钮
+    showPDFExportButton() {
+        const aiReportSection = document.getElementById('aiReportSection');
+        if (!aiReportSection) return;
+
+        const buttonHTML = `
+            <div class="text-center py-6">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <i class="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
+                    <p class="text-green-800 font-medium">AI专业报告已生成完成</p>
+                </div>
+                <div class="space-y-3">
+                    <button onclick="report.exportPDF()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition-all">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        导出PDF专业报告
+                    </button>
+                    <button onclick="report.viewAIReport()" class="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition-all">
+                        <i class="fas fa-eye mr-2"></i>
+                        查看AI报告详情
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        aiReportSection.innerHTML = buttonHTML;
+    }
+
+    // 导出PDF报告
+    async exportPDF() {
+        try {
+            if (!this.aiReport) {
+                alert('请先生成AI报告');
+                return;
+            }
+
+            // 显示PDF生成状态
+            this.showPDFStatus('正在生成PDF报告...');
+            
+            // 准备用户数据
+            const userData = {
+                name: '用户',
+                date: new Date().toLocaleDateString('zh-CN'),
+                mbtiType: this.mbtiResult.type,
+                hollandType: this.hollandResult.careerCode.primary
+            };
+            
+            // 生成PDF
+            const pdfDoc = await this.pdfService.generatePDFReport(this.aiReport, userData);
+            
+            // 下载PDF
+            const filename = `职业测评报告_${userData.mbtiType}_${userData.hollandType}_${new Date().toISOString().split('T')[0]}.pdf`;
+            this.pdfService.downloadPDF(pdfDoc, filename);
+            
+            // 显示成功状态
+            this.showPDFStatus('PDF报告导出成功！', 'success');
+            
+        } catch (error) {
+            console.error('PDF导出失败:', error);
+            this.showPDFStatus('PDF导出失败，请重试', 'error');
+        }
+    }
+
+    // 显示PDF状态
+    showPDFStatus(message, type = 'loading') {
+        const pdfStatus = document.getElementById('pdfStatus');
+        if (!pdfStatus) return;
+
+        const statusHTML = `
+            <div class="text-center py-4">
+                <div class="inline-block p-3 rounded-full mb-2 ${
+                    type === 'success' ? 'bg-green-100' : 
+                    type === 'error' ? 'bg-red-100' : 'bg-blue-100'
+                }">
+                    <i class="fas fa-${
+                        type === 'success' ? 'check-circle text-green-600' : 
+                        type === 'error' ? 'times-circle text-red-600' : 'sync fa-spin text-blue-600'
+                    } text-xl"></i>
+                </div>
+                <p class="text-sm text-gray-600">${message}</p>
+            </div>
+        `;
+        
+        pdfStatus.innerHTML = statusHTML;
+    }
+
+    // 查看AI报告详情
+    viewAIReport() {
+        if (!this.aiReport) {
+            alert('请先生成AI报告');
+            return;
+        }
+
+        const modalHTML = `
+            <div id="aiReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+                <div class="bg-white rounded-xl p-8 max-w-4xl w-full mx-4 my-8 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800">AI专业报告详情</h3>
+                        <button onclick="report.closeAIReportModal()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-blue-800 mb-2">执行摘要</h4>
+                            <p class="text-blue-700">${this.aiReport.summary}</p>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-2">性格特质分析</h4>
+                            <p class="text-green-700">${this.aiReport.personalityAnalysis}</p>
+                        </div>
+                        
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-purple-800 mb-2">职业兴趣匹配</h4>
+                            <p class="text-purple-700">${this.aiReport.careerInterest}</p>
+                        </div>
+                        
+                        <div class="bg-orange-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-orange-800 mb-2">价值观驱动分析</h4>
+                            <p class="text-orange-700">${this.aiReport.valuesAnalysis}</p>
+                        </div>
+                        
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-indigo-800 mb-2">综合职业推荐</h4>
+                            <p class="text-indigo-700">${this.aiReport.recommendations}</p>
+                        </div>
+                        
+                        <div class="bg-teal-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-teal-800 mb-2">发展建议</h4>
+                            <p class="text-teal-700">${this.aiReport.developmentPlan}</p>
+                        </div>
+                        
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-red-800 mb-2">风险提示</h4>
+                            <p class="text-red-700">${this.aiReport.riskWarnings}</p>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-yellow-800 mb-2">行业趋势分析</h4>
+                            <p class="text-yellow-700">${this.aiReport.industryTrends}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <button onclick="report.exportPDF()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">
+                            <i class="fas fa-file-pdf mr-2"></i>
+                            导出PDF报告
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    // 关闭AI报告模态框
+    closeAIReportModal() {
+        const modal = document.getElementById('aiReportModal');
+        if (modal) {
+            modal.remove();
         }
     }
 }

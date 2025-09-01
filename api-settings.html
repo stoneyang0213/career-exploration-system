@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API设置 - 职业探索星图</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 顶部导航 -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        返回首页
+                    </a>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center mr-6">
+                        <i class="fas fa-cog text-2xl text-indigo-600 mr-3"></i>
+                        <span class="font-bold text-gray-800">API设置</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-white rounded-3xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <div class="inline-block p-4 bg-blue-100 rounded-full mb-4">
+                    <i class="fas fa-key text-3xl text-blue-600"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-4">API设置</h1>
+                <p class="text-gray-600">配置OpenAI API密钥以启用AI专业报告功能</p>
+            </div>
+
+            <!-- OpenAI API设置 -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-robot text-2xl text-blue-600 mr-3"></i>
+                    <h2 class="text-xl font-bold text-gray-800">OpenAI API设置</h2>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">API密钥</label>
+                        <div class="flex">
+                            <input 
+                                type="password" 
+                                id="openaiApiKey" 
+                                placeholder="sk-..."
+                                class="flex-1 p-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                            <button 
+                                onclick="toggleApiKeyVisibility()" 
+                                class="px-4 py-3 bg-gray-100 border border-gray-300 border-l-0 rounded-r-lg hover:bg-gray-200"
+                            >
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">您的API密钥将安全存储在本地，不会上传到服务器</p>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button 
+                            onclick="saveApiKey()" 
+                            class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-all"
+                        >
+                            <i class="fas fa-save mr-2"></i>
+                            保存设置
+                        </button>
+                        <button 
+                            onclick="testApiKey()" 
+                            class="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-all"
+                        >
+                            <i class="fas fa-test mr-2"></i>
+                            测试连接
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 使用说明 -->
+            <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 mb-8">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-info-circle text-2xl text-green-600 mr-3"></i>
+                    <h2 class="text-xl font-bold text-gray-800">如何获取OpenAI API密钥</h2>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center mr-3 mt-1">
+                            <span class="text-sm font-bold">1</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">注册OpenAI账号</h3>
+                            <p class="text-gray-600">访问 <a href="https://platform.openai.com" target="_blank" class="text-blue-600 hover:underline">OpenAI Platform</a> 并注册账号</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center mr-3 mt-1">
+                            <span class="text-sm font-bold">2</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">创建API密钥</h3>
+                            <p class="text-gray-600">在API Keys页面点击"Create new secret key"创建新的API密钥</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center mr-3 mt-1">
+                            <span class="text-sm font-bold">3</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">复制密钥</h3>
+                            <p class="text-gray-600">复制生成的API密钥（以sk-开头），粘贴到上面的输入框中</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center mr-3 mt-1">
+                            <span class="text-sm font-bold">4</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">保存设置</h3>
+                            <p class="text-gray-600">点击"保存设置"按钮，然后就可以使用AI专业报告功能了</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 费用说明 -->
+            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-dollar-sign text-2xl text-yellow-600 mr-3"></i>
+                    <h2 class="text-xl font-bold text-gray-800">费用说明</h2>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <span class="text-gray-700">OpenAI API按使用量收费，每次生成报告约需$0.01-0.05</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <span class="text-gray-700">新用户可获得免费额度，足够生成多份报告</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <span class="text-gray-700">您可以在OpenAI控制台查看详细的使用情况和费用</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 状态提示 -->
+    <div id="statusMessage" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-4 border-l-4">
+            <div class="flex items-center">
+                <i id="statusIcon" class="mr-3"></i>
+                <span id="statusText"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时检查现有API密钥
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedApiKey = localStorage.getItem('openai_api_key');
+            if (savedApiKey) {
+                document.getElementById('openaiApiKey').value = savedApiKey;
+            }
+        });
+
+        // 切换API密钥可见性
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('openaiApiKey');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeIcon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                eyeIcon.className = 'fas fa-eye';
+            }
+        }
+
+        // 保存API密钥
+        function saveApiKey() {
+            const apiKey = document.getElementById('openaiApiKey').value.trim();
+            
+            if (!apiKey) {
+                showStatus('请输入API密钥', 'error');
+                return;
+            }
+            
+            if (!apiKey.startsWith('sk-')) {
+                showStatus('API密钥格式不正确，应以sk-开头', 'error');
+                return;
+            }
+            
+            localStorage.setItem('openai_api_key', apiKey);
+            showStatus('API密钥保存成功！', 'success');
+        }
+
+        // 测试API密钥
+        async function testApiKey() {
+            const apiKey = document.getElementById('openaiApiKey').value.trim();
+            
+            if (!apiKey) {
+                showStatus('请先输入API密钥', 'error');
+                return;
+            }
+            
+            showStatus('正在测试API连接...', 'loading');
+            
+            try {
+                const response = await fetch('https://api.openai.com/v1/models', {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+                
+                if (response.ok) {
+                    showStatus('API连接测试成功！', 'success');
+                } else {
+                    showStatus('API连接测试失败，请检查密钥是否正确', 'error');
+                }
+            } catch (error) {
+                showStatus('网络连接失败，请检查网络设置', 'error');
+            }
+        }
+
+        // 显示状态消息
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+            
+            statusText.textContent = message;
+            
+            // 设置图标和颜色
+            switch (type) {
+                case 'success':
+                    statusIcon.className = 'fas fa-check-circle text-green-500';
+                    statusDiv.className = 'fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-4 border-l-4 border-green-500';
+                    break;
+                case 'error':
+                    statusIcon.className = 'fas fa-times-circle text-red-500';
+                    statusDiv.className = 'fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-4 border-l-4 border-red-500';
+                    break;
+                case 'loading':
+                    statusIcon.className = 'fas fa-sync fa-spin text-blue-500';
+                    statusDiv.className = 'fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-4 border-l-4 border-blue-500';
+                    break;
+            }
+            
+            statusDiv.classList.remove('hidden');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
