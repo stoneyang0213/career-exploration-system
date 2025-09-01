@@ -284,219 +284,285 @@ class HollandAssessment {
         this.scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
         
         this.answers.forEach((answerIndex, questionIndex) => {
-            if (answerIndex !== undefined) {
-                const question = HOLLAND_QUESTIONS[questionIndex];
-                const selectedOption = question.options[answerIndex];
-                this.scores[selectedOption.dimension] += selectedOption.score;
+            if (answerIndex === undefined) return;
+
+            // --- 增加健壮性检查 ---
+            if (!HOLLAND_QUESTIONS || !HOLLAND_QUESTIONS[questionIndex]) {
+                console.error(`[CRITICAL] 无法找到问题数据！问题索引: ${questionIndex}`);
+                return; 
             }
+            const question = HOLLAND_QUESTIONS[questionIndex];
+
+            if (!question.options || !question.options[answerIndex]) {
+                console.error(`[CRITICAL] 无法找到选项数据！问题索引: ${questionIndex}, 答案索引: ${answerIndex}`);
+                return;
+            }
+            const selectedOption = question.options[answerIndex];
+
+            if (!selectedOption.dimension || selectedOption.score === undefined) {
+                console.error(`[CRITICAL] 选项数据不完整！`, selectedOption);
+                return;
+            }
+            // --- 检查结束 ---
+
+            this.scores[selectedOption.dimension] += selectedOption.score;
         });
     }
 
     // 显示结果
     showResults(careerCode) {
-        const primaryDimension = RIASEC_DIMENSIONS[careerCode.primary];
-        const secondaryDimension = RIASEC_DIMENSIONS[careerCode.secondary];
-        const resultContainer = document.getElementById('hollandResult');
-        
-        // 创建六边形雷达图数据
-        const radarData = Object.entries(this.scores).map(([dim, score]) => ({
-            dimension: dim,
-            score: score,
-            percentage: Math.round((score / Math.max(...Object.values(this.scores))) * 100),
-            info: RIASEC_DIMENSIONS[dim]
-        }));
+        try {
+            console.log('开始显示霍兰德测评结果:', careerCode);
+            
+            const primaryDimension = RIASEC_DIMENSIONS[careerCode.primary];
+            const secondaryDimension = RIASEC_DIMENSIONS[careerCode.secondary];
+            const resultContainer = document.getElementById('hollandResult');
+            
+            if (!primaryDimension || !secondaryDimension) {
+                console.error('维度信息未找到:', { primary: careerCode.primary, secondary: careerCode.secondary });
+                this.showErrorMessage('结果数据加载失败，请刷新页面重试');
+                return;
+            }
+            
+            if (!resultContainer) {
+                console.error('结果容器未找到');
+                this.showErrorMessage('页面元素加载失败，请刷新页面重试');
+                return;
+            }
+            
+            // 创建六边形雷达图数据
+            const radarData = Object.entries(this.scores).map(([dim, score]) => ({
+                dimension: dim,
+                score: score,
+                percentage: Math.round((score / Math.max(...Object.values(this.scores))) * 100),
+                info: RIASEC_DIMENSIONS[dim]
+            }));
 
-        // 获取职业建议
-        const primaryCareer = HOLLAND_CAREERS[careerCode.primary] || { careers: [], description: '' };
-        const combinedCareer = HOLLAND_CAREERS[careerCode.codes[1]] || primaryCareer;
+            // 获取职业建议
+            const primaryCareer = HOLLAND_CAREERS[careerCode.primary] || { careers: [], description: '' };
+            const combinedCareer = HOLLAND_CAREERS[careerCode.codes[1]] || primaryCareer;
 
-        resultContainer.innerHTML = `
-            <div class="text-center mb-8">
-                <div class="flex justify-center items-center mb-6">
-                    <div class="relative">
-                        <div class="w-32 h-32 rounded-full border-8 flex items-center justify-center text-white text-4xl font-bold shadow-xl" 
-                             style="background: linear-gradient(135deg, ${primaryDimension.color} 0%, ${secondaryDimension.color} 100%); border-color: ${primaryDimension.color}">
-                            ${careerCode.primary}${careerCode.secondary}
+            resultContainer.innerHTML = `
+                <div class="text-center mb-8">
+                    <div class="flex justify-center items-center mb-6">
+                        <div class="relative">
+                            <div class="w-32 h-32 rounded-full border-8 flex items-center justify-center text-white text-4xl font-bold shadow-xl" 
+                                 style="background: linear-gradient(135deg, ${primaryDimension.color} 0%, ${secondaryDimension.color} 100%); border-color: ${primaryDimension.color}">
+                                ${careerCode.primary}${careerCode.secondary}
+                            </div>
+                            <div class="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                                <i class="fas fa-star text-white text-sm"></i>
+                            </div>
                         </div>
-                        <div class="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                            <i class="fas fa-star text-white text-sm"></i>
+                    </div>
+                    
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">你的职业兴趣类型</h1>
+                    <div class="flex justify-center items-center space-x-4 mb-4">
+                        <div class="flex items-center">
+                            <i class="${primaryDimension.icon} mr-2" style="color: ${primaryDimension.color}"></i>
+                            <span class="font-semibold text-xl">${primaryDimension.name}</span>
+                        </div>
+                        <span class="text-gray-400">+</span>
+                        <div class="flex items-center">
+                            <i class="${secondaryDimension.icon} mr-2" style="color: ${secondaryDimension.color}"></i>
+                            <span class="font-semibold text-xl">${secondaryDimension.name}</span>
                         </div>
                     </div>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto">${primaryDimension.description}</p>
                 </div>
-                
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">你的职业兴趣类型</h1>
-                <div class="flex justify-center items-center space-x-4 mb-4">
-                    <div class="flex items-center">
-                        <i class="${primaryDimension.icon} mr-2" style="color: ${primaryDimension.color}"></i>
-                        <span class="font-semibold text-xl">${primaryDimension.name}</span>
-                    </div>
-                    <span class="text-gray-400">+</span>
-                    <div class="flex items-center">
-                        <i class="${secondaryDimension.icon} mr-2" style="color: ${secondaryDimension.color}"></i>
-                        <span class="font-semibold text-xl">${secondaryDimension.name}</span>
-                    </div>
-                </div>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">${primaryDimension.description}</p>
-            </div>
 
-            <div class="grid md:grid-cols-2 gap-8 mb-8">
-                <!-- RIASEC雷达图 -->
-                <div class="bg-gray-50 rounded-xl p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">
-                        <i class="fas fa-chart-radar mr-2 text-purple-600"></i>
-                        你的兴趣图谱
-                    </h3>
-                    <div class="relative">
-                        <!-- 简化的六边形显示 -->
-                        <div class="grid grid-cols-2 gap-4">
-                            ${radarData.map(item => `
-                                <div class="flex items-center justify-between p-3 bg-white rounded-lg">
-                                    <div class="flex items-center">
-                                        <i class="${item.info.icon} mr-3" style="color: ${item.info.color}"></i>
-                                        <div>
-                                            <div class="font-medium text-gray-800">${item.info.name}</div>
-                                            <div class="text-xs text-gray-500">${item.dimension}</div>
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <!-- RIASEC雷达图 -->
+                    <div class="bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">
+                            <i class="fas fa-chart-radar mr-2 text-purple-600"></i>
+                            你的兴趣图谱
+                        </h3>
+                        <div class="relative">
+                            <!-- 简化的六边形显示 -->
+                            <div class="grid grid-cols-2 gap-4">
+                                ${radarData.map(item => `
+                                    <div class="flex items-center justify-between p-3 bg-white rounded-lg">
+                                        <div class="flex items-center">
+                                            <i class="${item.info.icon} mr-3" style="color: ${item.info.color}"></i>
+                                            <div>
+                                                <div class="font-medium text-gray-800">${item.info.name}</div>
+                                                <div class="text-xs text-gray-500">${item.dimension}</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="font-bold text-lg" style="color: ${item.info.color}">${item.score}</div>
+                                            <div class="w-16 bg-gray-200 rounded-full h-2 mt-1">
+                                                <div class="h-2 rounded-full transition-all duration-1000" 
+                                                     style="width: ${item.percentage}%; background-color: ${item.info.color}"></div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="text-right">
-                                        <div class="font-bold text-lg" style="color: ${item.info.color}">${item.score}</div>
-                                        <div class="w-16 bg-gray-200 rounded-full h-2 mt-1">
-                                            <div class="h-2 rounded-full transition-all duration-1000" 
-                                                 style="width: ${item.percentage}%; background-color: ${item.info.color}"></div>
-                                        </div>
-                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 核心特质 -->
+                    <div class="bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-star mr-2 text-yellow-500"></i>
+                            你的核心特质
+                        </h3>
+                        <div class="space-y-3">
+                            ${primaryDimension.traits.map(trait => `
+                                <div class="flex items-center p-3 bg-white rounded-lg">
+                                    <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                    <span class="text-gray-700">${trait}</span>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 </div>
 
-                <!-- 核心特质 -->
-                <div class="bg-gray-50 rounded-xl p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-star mr-2 text-yellow-500"></i>
-                        你的核心特质
-                    </h3>
-                    <div class="space-y-3">
-                        ${primaryDimension.traits.map(trait => `
-                            <div class="flex items-center p-3 bg-white rounded-lg">
-                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                                <span class="text-gray-700">${trait}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8 mb-8">
-                <!-- 适合的职业 -->
-                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-briefcase mr-2 text-blue-600"></i>
-                        推荐职业领域
-                    </h3>
-                    <div class="grid grid-cols-1 gap-3">
-                        ${combinedCareer.careers.slice(0, 6).map(career => `
-                            <div class="bg-white bg-opacity-70 rounded-lg p-3 hover:bg-opacity-90 transition-all">
-                                <div class="flex items-center">
-                                    <i class="fas fa-arrow-right mr-3 text-blue-500"></i>
-                                    <span class="font-medium text-gray-700">${career}</span>
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <!-- 适合的职业 -->
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-briefcase mr-2 text-blue-600"></i>
+                            推荐职业领域
+                        </h3>
+                        <div class="grid grid-cols-1 gap-3">
+                            ${combinedCareer.careers.slice(0, 6).map(career => `
+                                <div class="bg-white bg-opacity-70 rounded-lg p-3 hover:bg-opacity-90 transition-all">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-arrow-right mr-3 text-blue-500"></i>
+                                        <span class="font-medium text-gray-700">${career}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('')}
+                            `).join('')}
+                        </div>
+                        <p class="text-sm text-gray-600 mt-4 bg-white bg-opacity-50 rounded-lg p-3">
+                            <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>
+                            ${combinedCareer.description}
+                        </p>
                     </div>
-                    <p class="text-sm text-gray-600 mt-4 bg-white bg-opacity-50 rounded-lg p-3">
-                        <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>
-                        ${combinedCareer.description}
-                    </p>
+
+                    <!-- 工作环境偏好 -->
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-building mr-2 text-green-600"></i>
+                            理想工作环境
+                        </h3>
+                        <div class="bg-white bg-opacity-70 rounded-lg p-4 mb-4">
+                            <h4 class="font-semibold text-gray-800 mb-2">主要环境</h4>
+                            <p class="text-gray-700">${primaryDimension.workEnvironment}</p>
+                        </div>
+                        <div class="bg-white bg-opacity-70 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-2">辅助环境</h4>
+                            <p class="text-gray-700">${secondaryDimension.workEnvironment}</p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 工作环境偏好 -->
-                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+                <!-- 发展建议 -->
+                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-100 mb-8">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-building mr-2 text-green-600"></i>
-                        理想工作环境
+                        <i class="fas fa-lightbulb mr-2 text-orange-600"></i>
+                        个人发展建议
                     </h3>
-                    <div class="bg-white bg-opacity-70 rounded-lg p-4 mb-4">
-                        <h4 class="font-semibold text-gray-800 mb-2">主要环境</h4>
-                        <p class="text-gray-700">${primaryDimension.workEnvironment}</p>
-                    </div>
-                    <div class="bg-white bg-opacity-70 rounded-lg p-4">
-                        <h4 class="font-semibold text-gray-800 mb-2">辅助环境</h4>
-                        <p class="text-gray-700">${secondaryDimension.workEnvironment}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 发展建议 -->
-            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-100 mb-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                    <i class="fas fa-lightbulb mr-2 text-orange-600"></i>
-                    个人发展建议
-                </h3>
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="bg-white bg-opacity-70 rounded-lg p-4">
-                        <h4 class="font-semibold text-gray-800 mb-2">
-                            <i class="fas fa-plus-circle mr-2 text-green-500"></i>
-                            发挥优势
-                        </h4>
-                        <ul class="text-sm text-gray-700 space-y-1">
-                            <li>• 充分利用你的${primaryDimension.name}特质</li>
-                            <li>• 寻找能体现${secondaryDimension.name}能力的机会</li>
-                            <li>• 在${primaryDimension.workEnvironment}中发展职业</li>
-                        </ul>
-                    </div>
-                    <div class="bg-white bg-opacity-70 rounded-lg p-4">
-                        <h4 class="font-semibold text-gray-800 mb-2">
-                            <i class="fas fa-chart-line mr-2 text-blue-500"></i>
-                            能力提升
-                        </h4>
-                        <ul class="text-sm text-gray-700 space-y-1">
-                            <li>• 培养较弱维度的相关技能</li>
-                            <li>• 寻求跨领域的学习机会</li>
-                            <li>• 建立多元化的职业发展路径</li>
-                        </ul>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white bg-opacity-70 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-2">
+                                <i class="fas fa-plus-circle mr-2 text-green-500"></i>
+                                发挥优势
+                            </h4>
+                            <ul class="text-sm text-gray-700 space-y-1">
+                                <li>• 充分利用你的${primaryDimension.name}特质</li>
+                                <li>• 寻找能体现${secondaryDimension.name}能力的机会</li>
+                                <li>• 在${primaryDimension.workEnvironment}中发展职业</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white bg-opacity-70 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-2">
+                                <i class="fas fa-chart-line mr-2 text-blue-500"></i>
+                                能力提升
+                            </h4>
+                            <ul class="text-sm text-gray-700 space-y-1">
+                                <li>• 培养较弱维度的相关技能</li>
+                                <li>• 寻求跨领域的学习机会</li>
+                                <li>• 建立多元化的职业发展路径</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 行动按钮 -->
-            <div class="text-center space-y-4">
-                <div class="flex flex-col md:flex-row gap-4 justify-center">
-                    <button onclick="hollandAssessment.continueToValues()" 
-                            class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all">
-                        <i class="fas fa-heart mr-2"></i>
-                        继续价值观测评
-                    </button>
+                <!-- 行动按钮 -->
+                <div class="text-center space-y-4">
+                    <div class="flex flex-col md:flex-row gap-4 justify-center">
+                        <button onclick="hollandAssessment.continueToValues()" 
+                                class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-all">
+                            <i class="fas fa-heart mr-2"></i>
+                            继续价值观测评
+                        </button>
+                        
+                        <button onclick="hollandAssessment.downloadReport()" 
+                                class="border-2 border-purple-600 text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-purple-50 transition-all">
+                            <i class="fas fa-download mr-2"></i>
+                            下载详细报告
+                        </button>
+                    </div>
                     
-                    <button onclick="hollandAssessment.downloadReport()" 
-                            class="border-2 border-purple-600 text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-purple-50 transition-all">
-                        <i class="fas fa-download mr-2"></i>
-                        下载详细报告
+                    <div class="flex justify-center space-x-6 text-sm text-gray-600">
+                        <button onclick="hollandAssessment.shareResult()" class="hover:text-purple-600 transition-colors">
+                            <i class="fas fa-share-alt mr-1"></i>
+                            分享结果
+                        </button>
+                        <button onclick="hollandAssessment.retakeTest()" class="hover:text-purple-600 transition-colors">
+                            <i class="fas fa-redo mr-1"></i>
+                            重新测试
+                        </button>
+                        <a href="../index.html" class="hover:text-purple-600 transition-colors">
+                            <i class="fas fa-home mr-1"></i>
+                            返回首页
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            // 确保结果容器可见 - 使用多种方式确保显示
+            resultContainer.classList.remove('hidden');
+            resultContainer.style.display = 'block';
+            resultContainer.style.visibility = 'visible';
+            resultContainer.style.opacity = '1';
+            resultContainer.style.position = 'relative';
+            resultContainer.style.zIndex = '10';
+            
+            console.log('霍兰德测评结果显示完成');
+            
+            // 保存结果
+            this.saveResult(careerCode);
+            
+        } catch (error) {
+            console.error('显示霍兰德测评结果时出错:', error);
+            this.showErrorMessage('结果显示失败，请刷新页面重试');
+        }
+    }
+
+    // 显示错误消息
+    showErrorMessage(message) {
+        const resultContainer = document.getElementById('hollandResult');
+        if (resultContainer) {
+            resultContainer.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="inline-block p-6 bg-red-100 rounded-full mb-6">
+                        <i class="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">显示错误</h2>
+                    <p class="text-gray-600 mb-6">${message}</p>
+                    <button onclick="location.reload()" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-700 transition-all">
+                        <i class="fas fa-refresh mr-2"></i>
+                        刷新页面
                     </button>
                 </div>
-                
-                <div class="flex justify-center space-x-6 text-sm text-gray-600">
-                    <button onclick="hollandAssessment.shareResult()" class="hover:text-purple-600 transition-colors">
-                        <i class="fas fa-share-alt mr-1"></i>
-                        分享结果
-                    </button>
-                    <button onclick="hollandAssessment.retakeTest()" class="hover:text-purple-600 transition-colors">
-                        <i class="fas fa-redo mr-1"></i>
-                        重新测试
-                    </button>
-                    <a href="../index.html" class="hover:text-purple-600 transition-colors">
-                        <i class="fas fa-home mr-1"></i>
-                        返回首页
-                    </a>
-                </div>
-            </div>
-        `;
-        
-        resultContainer.classList.remove('hidden');
-        
-        // 保存结果
-        this.saveResult(careerCode);
+            `;
+            resultContainer.classList.remove('hidden');
+        }
     }
 
     // 继续价值观测评
@@ -649,13 +715,16 @@ class HollandAssessment {
     }
 }
 
-// 初始化霍兰德测评
-const hollandAssessment = new HollandAssessment();
+// 定义全局变量，以便onclick可以访问
+let hollandAssessment;
 
 // 页面加载完成后的初始化
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🧭 霍兰德职业兴趣测评系统已加载完成！');
     
+    // 初始化霍兰德测评
+    hollandAssessment = new HollandAssessment();
+
     // 页面可见性变化监听
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {

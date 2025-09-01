@@ -170,7 +170,7 @@ class ValuesAssessment {
         }
         
         // 记录答案和时间
-        this.answers[this.currentQuestion] = optionIndex;
+        this.answers[this.currentQuestion] = { selectedOption: optionIndex };
         
         if (recordTime && this.questionTimes[this.currentQuestion]) {
             this.questionTimes[this.currentQuestion].end = Date.now();
@@ -281,219 +281,268 @@ class ValuesAssessment {
 
     // 计算分数
     calculateScores() {
-        // 重置分数
-        Object.keys(this.scores).forEach(key => {
-            this.scores[key] = 0;
-        });
+        this.scores = {};
         
-        this.answers.forEach((answerIndex, questionIndex) => {
-            if (answerIndex !== undefined) {
-                const question = VALUES_QUESTIONS[questionIndex];
-                const selectedOption = question.options[answerIndex];
-                this.scores[selectedOption.dimension] += selectedOption.score;
+        this.answers.forEach((answer, questionIndex) => {
+            if (answer === undefined || answer.selectedOption === undefined) return;
+
+            // --- 增加健robustness性检查 ---
+            if (!VALUES_QUESTIONS || !VALUES_QUESTIONS[questionIndex]) {
+                console.error(`[CRITICAL] 无法找到问题数据！问题索引: ${questionIndex}`);
+                return;
             }
+            const question = VALUES_QUESTIONS[questionIndex];
+
+            if (!question.options || !question.options[answer.selectedOption]) {
+                console.error(`[CRITICAL] 无法找到选项数据！问题索引: ${questionIndex}, 答案索引: ${answer.selectedOption}`);
+                return;
+            }
+            const selectedDimension = question.options[answer.selectedOption].dimension;
+            
+            if (!this.scores[selectedDimension]) {
+                this.scores[selectedDimension] = 0;
+            }
+            this.scores[selectedDimension]++;
         });
     }
 
     // 显示结果
     showResults(valueRanking) {
-        const topValue = valueRanking.ranking[0];
-        const secondValue = valueRanking.ranking[1];
-        const resultContainer = document.getElementById('valuesResult');
-        
-        resultContainer.innerHTML = `
-            <div class="text-center mb-8">
-                <div class="flex justify-center items-center mb-6">
-                    <div class="relative">
-                        <div class="w-32 h-32 rounded-full border-8 flex flex-col items-center justify-center text-white shadow-xl pulse-glow" 
-                             style="background: linear-gradient(135deg, ${topValue.info.color} 0%, ${secondValue.info.color} 100%); border-color: ${topValue.info.color}">
-                            <i class="${topValue.info.icon} text-3xl mb-1"></i>
-                            <span class="text-sm font-semibold">#${topValue.rank}</span>
-                        </div>
-                        <div class="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                            <i class="fas fa-crown text-white text-sm"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">你的核心价值观</h1>
-                <div class="flex justify-center items-center space-x-4 mb-4">
-                    <div class="flex items-center bg-gradient-to-r from-pink-100 to-purple-100 rounded-full px-4 py-2">
-                        <i class="${topValue.info.icon} mr-2" style="color: ${topValue.info.color}"></i>
-                        <span class="font-semibold text-lg">${topValue.info.name}</span>
-                    </div>
-                    <span class="text-gray-400">+</span>
-                    <div class="flex items-center bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full px-4 py-2">
-                        <i class="${secondValue.info.icon} mr-2" style="color: ${secondValue.info.color}"></i>
-                        <span class="font-semibold text-lg">${secondValue.info.name}</span>
-                    </div>
-                </div>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">${topValue.info.description}</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8 mb-8">
-                <!-- 价值观排序 -->
-                <div class="bg-gray-50 rounded-xl p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">
-                        <i class="fas fa-sort-amount-down mr-2 text-pink-600"></i>
-                        你的价值观排序
-                    </h3>
-                    <div class="space-y-3">
-                        ${valueRanking.ranking.map((item, index) => `
-                            <div class="flex items-center justify-between p-4 bg-white rounded-lg border-l-4" style="border-color: ${item.info.color}">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3 text-sm" style="background-color: ${item.info.color}">
-                                        ${item.rank}
-                                    </div>
-                                    <div>
-                                        <div class="font-medium text-gray-800">${item.info.name}</div>
-                                        <div class="text-xs text-gray-500">${item.info.english}</div>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-bold text-lg" style="color: ${item.info.color}">${item.score}</div>
-                                    <div class="w-16 bg-gray-200 rounded-full h-2 mt-1">
-                                        <div class="h-2 rounded-full transition-all duration-1000" 
-                                             style="width: ${item.percentage}%; background-color: ${item.info.color}"></div>
-                                    </div>
-                                </div>
+        try {
+            console.log('开始显示价值观测评结果:', valueRanking);
+            
+            const topValue = valueRanking.ranking[0];
+            const secondValue = valueRanking.ranking[1];
+            const resultContainer = document.getElementById('valuesResult');
+            
+            if (!topValue || !secondValue) {
+                console.error('价值观排序数据不完整:', valueRanking);
+                this.showErrorMessage('结果数据加载失败，请刷新页面重试');
+                return;
+            }
+            
+            if (!resultContainer) {
+                console.error('结果容器未找到');
+                this.showErrorMessage('页面元素加载失败，请刷新页面重试');
+                return;
+            }
+            
+            resultContainer.innerHTML = `
+                <div class="text-center mb-8">
+                    <div class="flex justify-center items-center mb-6">
+                        <div class="relative">
+                            <div class="w-32 h-32 rounded-full border-8 flex flex-col items-center justify-center text-white shadow-xl pulse-glow" 
+                                 style="background: linear-gradient(135deg, ${topValue.info.color} 0%, ${secondValue.info.color} 100%); border-color: ${topValue.info.color}">
+                                <i class="${topValue.info.icon} text-3xl mb-1"></i>
+                                <span class="text-sm font-semibold">#${topValue.rank}</span>
                             </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <!-- 核心特质 -->
-                <div class="bg-gray-50 rounded-xl p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-star mr-2 text-yellow-500"></i>
-                        你的核心特质
-                    </h3>
-                    <div class="space-y-3 mb-6">
-                        ${topValue.info.traits.map(trait => `
-                            <div class="flex items-center p-3 bg-white rounded-lg">
-                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                                <span class="text-gray-700">${trait}</span>
+                            <div class="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                                <i class="fas fa-crown text-white text-sm"></i>
                             </div>
-                        `).join('')}
+                        </div>
                     </div>
                     
-                    <div class="bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg p-4 border border-pink-100">
-                        <h4 class="font-semibold text-gray-800 mb-2">
-                            <i class="fas fa-briefcase mr-2 text-pink-600"></i>
-                            工作风格
-                        </h4>
-                        <p class="text-sm text-gray-700">${topValue.info.workStyle}</p>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">你的核心价值观</h1>
+                    <div class="flex justify-center items-center space-x-4 mb-4">
+                        <div class="flex items-center bg-gradient-to-r from-pink-100 to-purple-100 rounded-full px-4 py-2">
+                            <i class="${topValue.info.icon} mr-2" style="color: ${topValue.info.color}"></i>
+                            <span class="font-semibold text-lg">${topValue.info.name}</span>
+                        </div>
+                        <span class="text-gray-400">+</span>
+                        <div class="flex items-center bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full px-4 py-2">
+                            <i class="${secondValue.info.icon} mr-2" style="color: ${secondValue.info.color}"></i>
+                            <span class="font-semibold text-lg">${secondValue.info.name}</span>
+                        </div>
                     </div>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto">${topValue.info.description}</p>
                 </div>
-            </div>
 
-            ${valueRanking.combination ? `
-                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100 mb-8">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-puzzle-piece mr-2 text-blue-600"></i>
-                        你的价值观组合类型
-                    </h3>
-                    <div class="mb-4">
-                        <h4 class="font-bold text-lg text-gray-800 mb-2">${valueRanking.combination.description}</h4>
-                        <p class="text-gray-700 mb-4">${valueRanking.combination.careerPath}</p>
-                    </div>
-                    
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="bg-white bg-opacity-70 rounded-lg p-4">
-                            <h4 class="font-semibold text-gray-800 mb-3">
-                                <i class="fas fa-briefcase mr-2 text-green-600"></i>
-                                推荐职业
-                            </h4>
-                            <div class="space-y-2">
-                                ${valueRanking.combination.suitableCareers.map(career => `
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <!-- 价值观排序 -->
+                    <div class="bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">
+                            <i class="fas fa-sort-amount-down mr-2 text-pink-600"></i>
+                            你的价值观排序
+                        </h3>
+                        <div class="space-y-3">
+                            ${valueRanking.ranking.map((item, index) => `
+                                <div class="flex items-center justify-between p-4 bg-white rounded-lg border-l-4" style="border-color: ${item.info.color}">
                                     <div class="flex items-center">
-                                        <i class="fas fa-arrow-right mr-2 text-green-500 text-sm"></i>
-                                        <span class="text-gray-700 text-sm">${career}</span>
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3 text-sm" style="background-color: ${item.info.color}">
+                                            ${item.rank}
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-800">${item.info.name}</div>
+                                            <div class="text-xs text-gray-500">${item.info.english}</div>
+                                        </div>
                                     </div>
-                                `).join('')}
-                            </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-lg" style="color: ${item.info.color}">${item.score}</div>
+                                        <div class="w-16 bg-gray-200 rounded-full h-2 mt-1">
+                                            <div class="h-2 rounded-full transition-all duration-1000" 
+                                                 style="width: ${item.percentage}%; background-color: ${item.info.color}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- 核心特质 -->
+                    <div class="bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-star mr-2 text-yellow-500"></i>
+                            你的核心特质
+                        </h3>
+                        <div class="space-y-3 mb-6">
+                            ${topValue.info.traits.map(trait => `
+                                <div class="flex items-center p-3 bg-white rounded-lg">
+                                    <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                    <span class="text-gray-700">${trait}</span>
+                                </div>
+                            `).join('')}
                         </div>
                         
-                        <div class="bg-white bg-opacity-70 rounded-lg p-4">
-                            <h4 class="font-semibold text-gray-800 mb-3">
-                                <i class="fas fa-lightbulb mr-2 text-orange-600"></i>
-                                发展建议
+                        <div class="bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg p-4 border border-pink-100">
+                            <h4 class="font-semibold text-gray-800 mb-2">
+                                <i class="fas fa-briefcase mr-2 text-pink-600"></i>
+                                工作风格
                             </h4>
-                            <p class="text-sm text-gray-700">${valueRanking.combination.advice}</p>
+                            <p class="text-sm text-gray-700">${topValue.info.workStyle}</p>
                         </div>
                     </div>
                 </div>
-            ` : ''}
 
-            <!-- 综合建议 -->
-            <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 border border-green-100 mb-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                    <i class="fas fa-compass mr-2 text-green-600"></i>
-                    职业发展建议
-                </h3>
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="bg-white bg-opacity-70 rounded-lg p-4">
-                        <h4 class="font-semibold text-gray-800 mb-2">
-                            <i class="fas fa-thumbs-up mr-2 text-green-500"></i>
-                            发挥优势
-                        </h4>
-                        <ul class="text-sm text-gray-700 space-y-1">
-                            <li>• 寻找能体现"${topValue.info.name}"的工作机会</li>
-                            <li>• 在"${secondValue.info.name}"方面寻求发展空间</li>
-                            <li>• 选择与你价值观匹配的企业文化</li>
-                        </ul>
+                ${valueRanking.combination ? `
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100 mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-puzzle-piece mr-2 text-blue-600"></i>
+                            你的价值观组合类型
+                        </h3>
+                        <div class="bg-white bg-opacity-70 rounded-lg p-4 mb-4">
+                            <h4 class="font-semibold text-gray-800 mb-2">${valueRanking.combination.description}</h4>
+                            <p class="text-sm text-gray-700">${valueRanking.combination.careerPath}</p>
+                        </div>
+                        <div class="grid grid-cols-1 gap-3">
+                            ${valueRanking.combination.suitableCareers.map(career => `
+                                <div class="bg-white bg-opacity-70 rounded-lg p-3 hover:bg-opacity-90 transition-all">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-arrow-right mr-3 text-blue-500"></i>
+                                        <span class="font-medium text-gray-700">${career}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <p class="text-sm text-gray-600 mt-4 bg-white bg-opacity-50 rounded-lg p-3">
+                            <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>
+                            ${valueRanking.combination.advice}
+                        </p>
                     </div>
-                    <div class="bg-white bg-opacity-70 rounded-lg p-4">
-                        <h4 class="font-semibold text-gray-800 mb-2">
-                            <i class="fas fa-balance-scale mr-2 text-blue-500"></i>
-                            平衡发展
-                        </h4>
-                        <ul class="text-sm text-gray-700 space-y-1">
-                            <li>• 适当关注得分较低的价值观维度</li>
-                            <li>• 在不同人生阶段调整价值观重点</li>
-                            <li>• 寻求多元化的职业体验机会</li>
-                        </ul>
+                ` : ''}
+
+                <!-- 发展建议 -->
+                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-100 mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-lightbulb mr-2 text-orange-600"></i>
+                        个人发展建议
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white bg-opacity-70 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-2">
+                                <i class="fas fa-plus-circle mr-2 text-green-500"></i>
+                                发挥优势
+                            </h4>
+                            <ul class="text-sm text-gray-700 space-y-1">
+                                <li>• 在工作中体现你的${topValue.info.name}价值观</li>
+                                <li>• 寻找能够满足${secondValue.info.name}需求的机会</li>
+                                <li>• 选择符合你价值观的工作环境</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white bg-opacity-70 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-2">
+                                <i class="fas fa-chart-line mr-2 text-blue-500"></i>
+                                平衡发展
+                            </h4>
+                            <ul class="text-sm text-gray-700 space-y-1">
+                                <li>• 适当关注得分较低的价值观维度</li>
+                                <li>• 在不同人生阶段调整价值观重点</li>
+                                <li>• 寻求多元化的职业体验机会</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 行动按钮 -->
-            <div class="text-center space-y-4">
-                <div class="flex flex-col md:flex-row gap-4 justify-center">
-                    <button onclick="valuesAssessment.generateComprehensiveReport()" 
-                            class="values-bg text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all">
-                        <i class="fas fa-file-alt mr-2"></i>
-                        生成综合报告
-                    </button>
+                <!-- 行动按钮 -->
+                <div class="text-center space-y-4">
+                    <div class="flex flex-col md:flex-row gap-4 justify-center">
+                        <button onclick="valuesAssessment.generateComprehensiveReport()" 
+                                class="values-bg text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all">
+                            <i class="fas fa-file-alt mr-2"></i>
+                            生成综合报告
+                        </button>
+                        
+                        <button onclick="valuesAssessment.downloadReport()" 
+                                class="border-2 border-pink-600 text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-pink-50 transition-all">
+                            <i class="fas fa-download mr-2"></i>
+                            下载详细报告
+                        </button>
+                    </div>
                     
-                    <button onclick="valuesAssessment.downloadReport()" 
-                            class="border-2 border-pink-600 text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-pink-50 transition-all">
-                        <i class="fas fa-download mr-2"></i>
-                        下载详细报告
+                    <div class="flex justify-center space-x-6 text-sm text-gray-600">
+                        <button onclick="valuesAssessment.shareResult()" class="hover:text-pink-600 transition-colors">
+                            <i class="fas fa-share-alt mr-1"></i>
+                            分享结果
+                        </button>
+                        <button onclick="valuesAssessment.retakeTest()" class="hover:text-pink-600 transition-colors">
+                            <i class="fas fa-redo mr-1"></i>
+                            重新测试
+                        </button>
+                        <a href="../index.html" class="hover:text-pink-600 transition-colors">
+                            <i class="fas fa-home mr-1"></i>
+                            返回首页
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            // 确保结果容器可见 - 使用多种方式确保显示
+            resultContainer.classList.remove('hidden');
+            resultContainer.style.display = 'block';
+            resultContainer.style.visibility = 'visible';
+            resultContainer.style.opacity = '1';
+            resultContainer.style.position = 'relative';
+            resultContainer.style.zIndex = '10';
+            
+            console.log('价值观测评结果显示完成');
+            
+            // 保存结果
+            this.saveResult(valueRanking);
+            
+        } catch (error) {
+            console.error('显示价值观测评结果时出错:', error);
+            this.showErrorMessage('结果显示失败，请刷新页面重试');
+        }
+    }
+
+    // 显示错误消息
+    showErrorMessage(message) {
+        const resultContainer = document.getElementById('valuesResult');
+        if (resultContainer) {
+            resultContainer.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="inline-block p-6 bg-red-100 rounded-full mb-6">
+                        <i class="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">显示错误</h2>
+                    <p class="text-gray-600 mb-6">${message}</p>
+                    <button onclick="location.reload()" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-700 transition-all">
+                        <i class="fas fa-refresh mr-2"></i>
+                        刷新页面
                     </button>
                 </div>
-                
-                <div class="flex justify-center space-x-6 text-sm text-gray-600">
-                    <button onclick="valuesAssessment.shareResult()" class="hover:text-pink-600 transition-colors">
-                        <i class="fas fa-share-alt mr-1"></i>
-                        分享结果
-                    </button>
-                    <button onclick="valuesAssessment.retakeTest()" class="hover:text-pink-600 transition-colors">
-                        <i class="fas fa-redo mr-1"></i>
-                        重新测试
-                    </button>
-                    <a href="../index.html" class="hover:text-pink-600 transition-colors">
-                        <i class="fas fa-home mr-1"></i>
-                        返回首页
-                    </a>
-                </div>
-            </div>
-        `;
-        
-        resultContainer.classList.remove('hidden');
-        
-        // 保存结果
-        this.saveResult(valueRanking);
+            `;
+            resultContainer.classList.remove('hidden');
+        }
     }
 
     // 生成综合报告
@@ -664,13 +713,16 @@ class ValuesAssessment {
     }
 }
 
-// 初始化价值观测评
-const valuesAssessment = new ValuesAssessment();
+// 定义全局变量，以便onclick可以访问
+let valuesAssessment;
 
 // 页面加载完成后的初始化
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('💎 职业价值观测评系统已加载完成！');
+    console.log('🌟 价值观测评系统已加载完成！');
     
+    // 初始化价值观测评
+    valuesAssessment = new ValuesAssessment();
+
     // 页面可见性变化监听
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
