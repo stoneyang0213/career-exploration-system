@@ -45,14 +45,14 @@
                     <i class="fas fa-key text-3xl text-blue-600"></i>
                 </div>
                 <h1 class="text-3xl font-bold text-gray-800 mb-4">API设置</h1>
-                <p class="text-gray-600">配置OpenAI API密钥以启用AI专业报告功能</p>
+                <p class="text-gray-600">配置SiliconFlow API密钥以启用AI专业报告功能</p>
             </div>
 
-            <!-- OpenAI API设置 -->
+            <!-- SiliconFlow API设置 -->
             <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8">
                 <div class="flex items-center mb-4">
                     <i class="fas fa-robot text-2xl text-blue-600 mr-3"></i>
-                    <h2 class="text-xl font-bold text-gray-800">OpenAI API设置</h2>
+                    <h2 class="text-xl font-bold text-gray-800">SiliconFlow API设置</h2>
                 </div>
                 
                 <div class="space-y-4">
@@ -61,7 +61,7 @@
                         <div class="flex">
                             <input 
                                 type="password" 
-                                id="openaiApiKey" 
+                                id="siliconflowApiKey" 
                                 placeholder="sk-..."
                                 class="flex-1 p-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
@@ -73,6 +73,16 @@
                             </button>
                         </div>
                         <p class="text-sm text-gray-500 mt-2">您的API密钥将安全存储在本地，不会上传到服务器</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">选择模型</label>
+                        <select id="siliconflowModel" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="qwen-plus">Qwen Plus (推荐)</option>
+                            <option value="qwen-turbo">Qwen Turbo (快速)</option>
+                            <option value="qwen-max">Qwen Max (高质量)</option>
+                            <option value="qwen-max-longcontext">Qwen Max LongContext (长文本)</option>
+                        </select>
                     </div>
                     
                     <div class="flex space-x-3">
@@ -98,72 +108,121 @@
             <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 mb-8">
                 <div class="flex items-center mb-4">
                     <i class="fas fa-info-circle text-2xl text-green-600 mr-3"></i>
-                    <h2 class="text-xl font-bold text-gray-800">如何获取OpenAI API密钥</h2>
+                    <h2 class="text-xl font-bold text-gray-800">如何获取SiliconFlow API密钥</h2>
                 </div>
                 
-                <div class="space-y-4">
+                <div class="space-y-4 text-gray-700">
                     <div class="flex items-start">
-                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center mr-3 mt-1">
-                            <span class="text-sm font-bold">1</span>
-                        </div>
+                        <span class="bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full mr-3 mt-1">1</span>
                         <div>
-                            <h3 class="font-semibold text-gray-800">注册OpenAI账号</h3>
-                            <p class="text-gray-600">访问 <a href="https://platform.openai.com" target="_blank" class="text-blue-600 hover:underline">OpenAI Platform</a> 并注册账号</p>
+                            <p class="font-medium">注册SiliconFlow账号</p>
+                            <p class="text-sm text-gray-600">访问 <a href="https://siliconflow.cn" target="_blank" class="text-blue-600 hover:underline">siliconflow.cn</a> 注册账号</p>
                         </div>
                     </div>
                     
                     <div class="flex items-start">
-                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center mr-3 mt-1">
-                            <span class="text-sm font-bold">2</span>
-                        </div>
+                        <span class="bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full mr-3 mt-1">2</span>
                         <div>
-                            <h3 class="font-semibold text-gray-800">创建API密钥</h3>
-                            <p class="text-gray-600">在API Keys页面点击"Create new secret key"创建新的API密钥</p>
+                            <p class="font-medium">获取API密钥</p>
+                            <p class="text-sm text-gray-600">登录后在控制台中找到API密钥管理，创建新的API密钥</p>
                         </div>
                     </div>
                     
                     <div class="flex items-start">
-                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center mr-3 mt-1">
-                            <span class="text-sm font-bold">3</span>
-                        </div>
+                        <span class="bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full mr-3 mt-1">3</span>
                         <div>
-                            <h3 class="font-semibold text-gray-800">复制密钥</h3>
-                            <p class="text-gray-600">复制生成的API密钥（以sk-开头），粘贴到上面的输入框中</p>
+                            <p class="font-medium">充值账户</p>
+                            <p class="text-sm text-gray-600">SiliconFlow提供免费额度，超出后需要充值使用</p>
                         </div>
                     </div>
                     
                     <div class="flex items-start">
-                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center mr-3 mt-1">
-                            <span class="text-sm font-bold">4</span>
-                        </div>
+                        <span class="bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full mr-3 mt-1">4</span>
                         <div>
-                            <h3 class="font-semibold text-gray-800">保存设置</h3>
-                            <p class="text-gray-600">点击"保存设置"按钮，然后就可以使用AI专业报告功能了</p>
+                            <p class="font-medium">选择模型</p>
+                            <p class="text-sm text-gray-600">根据需求选择合适的模型，推荐使用Qwen Plus</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 费用说明 -->
+            <!-- 模型说明 -->
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-8">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-brain text-2xl text-purple-600 mr-3"></i>
+                    <h2 class="text-xl font-bold text-gray-800">模型说明</h2>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                        <h3 class="font-semibold text-purple-800 mb-2">Qwen Plus</h3>
+                        <p class="text-sm text-gray-600 mb-2">平衡性能和速度，适合大多数应用场景</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded">推荐</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                        <h3 class="font-semibold text-purple-800 mb-2">Qwen Turbo</h3>
+                        <p class="text-sm text-gray-600 mb-2">响应速度快，适合实时对话和简单任务</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">快速</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                        <h3 class="font-semibold text-purple-800 mb-2">Qwen Max</h3>
+                        <p class="text-sm text-gray-600 mb-2">最高质量输出，适合复杂分析和创作</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded">高质量</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                        <h3 class="font-semibold text-purple-800 mb-2">Qwen Max LongContext</h3>
+                        <p class="text-sm text-gray-600 mb-2">支持超长文本，适合文档分析和长报告生成</p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded">长文本</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 价格说明 -->
             <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6">
                 <div class="flex items-center mb-4">
                     <i class="fas fa-dollar-sign text-2xl text-yellow-600 mr-3"></i>
-                    <h2 class="text-xl font-bold text-gray-800">费用说明</h2>
+                    <h2 class="text-xl font-bold text-gray-800">价格说明</h2>
                 </div>
                 
-                <div class="space-y-3">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                        <span class="text-gray-700">OpenAI API按使用量收费，每次生成报告约需$0.01-0.05</span>
+                <div class="space-y-3 text-gray-700">
+                    <div class="flex justify-between items-center">
+                        <span>免费额度</span>
+                        <span class="font-semibold text-green-600">每月免费使用</span>
                     </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                        <span class="text-gray-700">新用户可获得免费额度，足够生成多份报告</span>
+                    <div class="flex justify-between items-center">
+                        <span>Qwen Plus</span>
+                        <span class="font-semibold">$0.01/1K tokens</span>
                     </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                        <span class="text-gray-700">您可以在OpenAI控制台查看详细的使用情况和费用</span>
+                    <div class="flex justify-between items-center">
+                        <span>Qwen Turbo</span>
+                        <span class="font-semibold">$0.005/1K tokens</span>
                     </div>
+                    <div class="flex justify-between items-center">
+                        <span>Qwen Max</span>
+                        <span class="font-semibold">$0.02/1K tokens</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Qwen Max LongContext</span>
+                        <span class="font-semibold">$0.03/1K tokens</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        提示：一次职业测评报告大约需要1000-2000 tokens，成本很低
+                    </p>
                 </div>
             </div>
         </div>
@@ -171,7 +230,7 @@
 
     <!-- 状态提示 -->
     <div id="statusMessage" class="fixed top-4 right-4 z-50 hidden">
-        <div class="bg-white rounded-lg shadow-lg p-4 border-l-4">
+        <div class="bg-white rounded-lg shadow-lg p-4 max-w-sm">
             <div class="flex items-center">
                 <i id="statusIcon" class="mr-3"></i>
                 <span id="statusText"></span>
@@ -180,71 +239,90 @@
     </div>
 
     <script>
-        // 页面加载时检查现有API密钥
+        // 页面加载时加载保存的设置
         document.addEventListener('DOMContentLoaded', function() {
-            const savedApiKey = localStorage.getItem('openai_api_key');
+            const savedApiKey = localStorage.getItem('siliconflow_api_key');
+            const savedModel = localStorage.getItem('siliconflow_model');
+            
             if (savedApiKey) {
-                document.getElementById('openaiApiKey').value = savedApiKey;
+                document.getElementById('siliconflowApiKey').value = savedApiKey;
+            }
+            
+            if (savedModel) {
+                document.getElementById('siliconflowModel').value = savedModel;
             }
         });
 
         // 切换API密钥可见性
         function toggleApiKeyVisibility() {
-            const input = document.getElementById('openaiApiKey');
-            const eyeIcon = document.getElementById('eyeIcon');
+            const input = document.getElementById('siliconflowApiKey');
+            const icon = document.getElementById('eyeIcon');
             
             if (input.type === 'password') {
                 input.type = 'text';
-                eyeIcon.className = 'fas fa-eye-slash';
+                icon.className = 'fas fa-eye-slash';
             } else {
                 input.type = 'password';
-                eyeIcon.className = 'fas fa-eye';
+                icon.className = 'fas fa-eye';
             }
         }
 
         // 保存API密钥
         function saveApiKey() {
-            const apiKey = document.getElementById('openaiApiKey').value.trim();
+            const apiKey = document.getElementById('siliconflowApiKey').value.trim();
+            const model = document.getElementById('siliconflowModel').value;
             
             if (!apiKey) {
                 showStatus('请输入API密钥', 'error');
                 return;
             }
             
-            if (!apiKey.startsWith('sk-')) {
-                showStatus('API密钥格式不正确，应以sk-开头', 'error');
-                return;
-            }
+            localStorage.setItem('siliconflow_api_key', apiKey);
+            localStorage.setItem('siliconflow_model', model);
             
-            localStorage.setItem('openai_api_key', apiKey);
-            showStatus('API密钥保存成功！', 'success');
+            showStatus('设置保存成功！', 'success');
         }
 
-        // 测试API密钥
+        // 测试API连接
         async function testApiKey() {
-            const apiKey = document.getElementById('openaiApiKey').value.trim();
+            const apiKey = document.getElementById('siliconflowApiKey').value.trim();
+            const model = document.getElementById('siliconflowModel').value;
             
             if (!apiKey) {
                 showStatus('请先输入API密钥', 'error');
                 return;
             }
             
-            showStatus('正在测试API连接...', 'loading');
+            showStatus('正在测试连接...', 'loading');
             
             try {
-                const response = await fetch('https://api.openai.com/v1/models', {
+                const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+                    method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${apiKey}`
-                    }
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [
+                            {
+                                role: 'user',
+                                content: '你好，请回复"连接成功"'
+                            }
+                        ],
+                        max_tokens: 50
+                    })
                 });
                 
                 if (response.ok) {
-                    showStatus('API连接测试成功！', 'success');
+                    const data = await response.json();
+                    showStatus('连接测试成功！', 'success');
                 } else {
-                    showStatus('API连接测试失败，请检查密钥是否正确', 'error');
+                    const errorData = await response.json();
+                    showStatus(`连接失败: ${errorData.error?.message || '未知错误'}`, 'error');
                 }
             } catch (error) {
-                showStatus('网络连接失败，请检查网络设置', 'error');
+                showStatus('连接测试失败，请检查网络和API密钥', 'error');
             }
         }
 
@@ -260,15 +338,12 @@
             switch (type) {
                 case 'success':
                     statusIcon.className = 'fas fa-check-circle text-green-500';
-                    statusDiv.className = 'fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-4 border-l-4 border-green-500';
                     break;
                 case 'error':
-                    statusIcon.className = 'fas fa-times-circle text-red-500';
-                    statusDiv.className = 'fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-4 border-l-4 border-red-500';
+                    statusIcon.className = 'fas fa-exclamation-circle text-red-500';
                     break;
                 case 'loading':
-                    statusIcon.className = 'fas fa-sync fa-spin text-blue-500';
-                    statusDiv.className = 'fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-4 border-l-4 border-blue-500';
+                    statusIcon.className = 'fas fa-spinner fa-spin text-blue-500';
                     break;
             }
             

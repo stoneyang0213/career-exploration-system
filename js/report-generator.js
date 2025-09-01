@@ -860,14 +860,19 @@ class ReportGenerator {
             this.showAIReportStatus('正在生成AI专业报告...');
             
             // 检查API密钥
-            const apiKey = localStorage.getItem('openai_api_key');
+            const apiKey = localStorage.getItem('siliconflow_api_key');
+            const model = localStorage.getItem('siliconflow_model');
+            
             if (!apiKey) {
                 this.showAPIKeyModal();
                 return;
             }
 
-            // 设置API密钥
+            // 设置API密钥和模型
             this.aiService.setApiKey(apiKey);
+            if (model) {
+                this.aiService.model = model;
+            }
             
             // 生成AI报告
             this.aiReport = await this.aiService.generateCareerReport(
@@ -919,12 +924,12 @@ class ReportGenerator {
         const modalHTML = `
             <div id="apiKeyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">设置OpenAI API密钥</h3>
-                    <p class="text-gray-600 mb-4">为了生成AI专业报告，需要设置OpenAI API密钥。</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">设置SiliconFlow API密钥</h3>
+                    <p class="text-gray-600 mb-4">为了生成AI专业报告，需要设置SiliconFlow API密钥。</p>
                     <input 
                         type="password" 
                         id="apiKeyInput" 
-                        placeholder="请输入您的OpenAI API密钥"
+                        placeholder="请输入您的SiliconFlow API密钥"
                         class="w-full p-3 border border-gray-300 rounded-lg mb-4"
                     >
                     <div class="flex space-x-3">
@@ -950,7 +955,7 @@ class ReportGenerator {
             return;
         }
         
-        localStorage.setItem('openai_api_key', apiKey);
+        localStorage.setItem('siliconflow_api_key', apiKey);
         this.closeAPIKeyModal();
         
         // 重新生成AI报告

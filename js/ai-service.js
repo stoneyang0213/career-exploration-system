@@ -1,9 +1,9 @@
 // AI服务模块 - 处理AI大模型调用和PDF生成
 class AIService {
     constructor() {
-        this.apiEndpoint = 'https://api.openai.com/v1/chat/completions';
+        this.apiEndpoint = 'https://api.siliconflow.cn/v1/chat/completions'; // 改为SiliconFlow API
         this.apiKey = null;
-        this.model = 'gpt-4';
+        this.model = 'qwen-plus'; // 改为SiliconFlow的默认模型
         this.maxTokens = 2000;
         this.temperature = 0.7;
     }
